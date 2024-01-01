@@ -1,0 +1,27 @@
+.bandeira {
+	background-image: url('images/bandeira.png');
+}
+.bomba{
+	background-image: url('images/bomba.png');
+}
+.bomba-explodiu {
+	background-image: url('images/bomba-kaboom.jpg');
+}
+.feliz {
+	background-image: url('images/smile.png');
+}
+.vitoria {
+	background-image: url("images/smile-yeah.png");
+}
+.sad {
+	background-image: url('images/sad.png');
+}
+
+.imagem, .bandeira {
+	width: 30px;
+	height: 30px;
+
+	background-repeat: no-repeat;
+    background-size: cover;
+    object-fit: cover;
+}

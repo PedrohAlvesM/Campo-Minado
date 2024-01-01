@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campo Minado</title>
+
+  <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="imagem.css">
+</head>
+<body>
+
+  <div class="modal borda-container">
+    
+    <h1>Dificuldade personalizada</h1>
+    
+    <div>
+      <label for="largura-personalizado">Largura</label>
+      <input type="number" id="largura-personalizado">
+    </div>
+
+    <div>
+      <label for="altura-personalizado">Altura</label>
+      <input type="number" id="altura-personalizado">
+    </div>
+
+    <div>
+      <label for="bombas-personalizado">Bombas</label>
+      <input type="number" id="bombas-personalizado">
+    </div>
+    <div>
+      <button id="sair-modal">Cancelar</button>
+      <button id="confirmar-personalizado">Confirmar</button>
+    </div>
+    <p id="mensagem">O numero de bombas não pode ser maior que <em>Largura x Altura</em>. </p>
+  </div>
+  
+  <section class="borda-container">
+    <ul class="configuracao borda-container" id="menu">
+      <li id="comecar" class="borda-bloco">
+        <select id="dificuldade">
+          <option value="facil">Facil</option>
+          <option value="medio">Médio</option>
+          <option value="dificil">Difícil</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+      </li>
+      <li class="feliz borda-bloco imagem" id="rosto" onclick="window.location = 'index.html'"> </li>
+      <li id="bombas-restantes" class=""></p>
+      <li id="tempo-jogado" class="">0</li>
+    </ul>
+    
+    
+    <div id="jogo" class="borda-container">
+      
+    </div>
+  </section>
+
+  <script>
+    function disableContextMenu() {
+      document.oncontextmenu = function() {
+        return false;
+      };
+    }
+  </script>
+  <script src="main.js"> </script>
+  <script src="menu.js"> </script>
+</body>
+</html>
