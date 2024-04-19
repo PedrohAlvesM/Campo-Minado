@@ -1,37 +1,44 @@
 let contaBombas;
 let cronometro;
 let venceu = false;
+let bombasCriadas = false;
 
 function Main(lado, altura, Nbombas) {
 	clearInterval(cronometro);
 	venceu = false;
+
 	contaBombas = Nbombas;
 	document.getElementById("rosto").classList.remove("sad");
 	document.getElementById("rosto").classList.add("feliz");
 
 	document.getElementById("bombas-restantes").innerText = contaBombas;
 
-	let matrizJogo;
-	let indexBomba;
-	let retornoGeraBombas;
-
 	CriarGrid(lado, altura);
 	let blocos = document.getElementsByClassName('bloco');
-
-	retornoGeraBombas = GeraBombas(Nbombas, lado, altura);
-	matrizJogo = retornoGeraBombas.MatrizComBombas;
-	indexBomba = retornoGeraBombas.IndexDasBombas;
-
-	for (let [posX, posY] of indexBomba) {
-		ResolveJogo(matrizJogo, posX, posY);
-	}
+	let matrizJogo;
 
 	for (let i = 0; i < blocos.length; i++) {
-		blocos[i].addEventListener('mousedown', (e) => { RevelaBloco(matrizJogo, blocos, i, lado, Nbombas, e) });
-	}
+		blocos[i].addEventListener('mousedown', (e) => {
+			if (bombasCriadas) {
+				RevelaBloco(matrizJogo, blocos, i, lado, Nbombas, e)
+			}
+			else {
+				retornoGeraBombas = GeraBombas(Nbombas, lado, altura,  Math.floor(i / altura), Math.floor(i % altura));
+				matrizJogo = retornoGeraBombas.MatrizComBombas;
+				let indexBomba = retornoGeraBombas.IndexDasBombas;
 
-	Cronometro();
-	document.querySelector("#comecar").disabled = true;
+				for (let [posX, posY] of indexBomba) {
+					ResolveJogo(matrizJogo, posX, posY);
+				}
+				RevelaBloco(matrizJogo, blocos, i, lado, Nbombas, e);
+				
+				bombasCriadas = true;
+			}
+		});
+}
+
+Cronometro();
+document.querySelector("#comecar").disabled = true;
 }
 
 function CriarGrid(ladoGrid, alturaGrid) {
@@ -54,22 +61,21 @@ function CriarGrid(ladoGrid, alturaGrid) {
 
 }
 
-function GeraBombas(Nbombas, Nlinhas, Ncolunas) {
+function GeraBombas(Nbombas, Nlinhas, Ncolunas, linhaClicada, colunaClicada) {
 	let matriz = CriarMatriz(Nlinhas, Ncolunas);
 	let guardaIndexBomba = [];
 
 	for (let i = 0; i < Nbombas; i++) {
-		let posicaoBomba = [0, 0];
-		posicaoBomba[0] = Math.floor(Math.random() * (Nlinhas));
-		posicaoBomba[1] = Math.floor(Math.random() * (Ncolunas));
+		let linha = Math.floor(Math.random() * (Nlinhas));
+		let coluna = Math.floor(Math.random() * (Ncolunas));
 
-		if (matriz[posicaoBomba[0]][posicaoBomba[1]] === "B") {
+		if (matriz[linha][coluna] === "B" || (linhaClicada === linha && colunaClicada === coluna)) {
 			i -= 1;
 			continue
 		}
 
-		matriz[posicaoBomba[0]][posicaoBomba[1]] = "B";
-		guardaIndexBomba.push(posicaoBomba);
+		matriz[linha][coluna] = "B";
+		guardaIndexBomba.push([linha, coluna]);
 	}
 
 	let retornaMatrizIndex = {
@@ -140,7 +146,7 @@ function RevelaBloco(matrizJogo, elementos, indiceArr, colunasTotal, bombas, btn
 			contaBombas++;
 			document.getElementById("bombas-restantes").innerText = contaBombas;
 		}
-		else if (elementos[indiceArr].innerText === ""){
+		else if (elementos[indiceArr].innerText === "") {
 			elementos[indiceArr].classList.add('bandeira', "imagem");
 			btnMouse.preventDefault();
 			contaBombas--;
@@ -155,17 +161,17 @@ function RevelaBloco(matrizJogo, elementos, indiceArr, colunasTotal, bombas, btn
 }
 
 
-function revealEmptyCells(board, row, col, cel) {
-	if (row < 0 || row >= board.length || col < 0 || col >= board[0].length) {
+function revealEmptyCells(jogo, linha, coluna, blocos) {
+	if (linha < 0 || linha >= jogo.length || coluna < 0 || coluna >= jogo[0].length) {
 		return;
 	}
 
-	if (board[row][col] !== 0) {
+	if (jogo[linha][coluna] !== 0) {
 		return;
 	}
 
 	// Marca a célula como revelada (pode ser qualquer valor diferente de 0)
-	cel[row * board[0].length + col].classList.add("bloco-clicado");
+	blocos[linha * jogo[0].length + coluna].classList.add("bloco-clicado");
 
 	// Define os movimentos possíveis nas coordenadas (linha, coluna)
 	const moves = [
@@ -174,41 +180,40 @@ function revealEmptyCells(board, row, col, cel) {
 
 	// Utilizamos uma fila para a busca em largura
 	const queue = [];
-	queue.push({ row, col });
+	queue.push({ linha, coluna });
 
 	while (queue.length > 0) {
-		debugger
-		const { row, col } = queue.shift();
+		const { linha, coluna } = queue.shift();
 
 		// Verifica células vizinhas
 		for (const [dr, dc] of moves) {
-			const newRow = row + dr;
-			const newCol = col + dc;
+			const newRow = linha + dr;
+			const newCol = coluna + dc;
 
-			if (newRow >= 0 && newRow < board.length && newCol >= 0 && newCol < board[0].length) {
-				if (board[newRow][newCol] === 0) {
-					cel[newRow * board[0].length + newCol].classList.add("bloco-clicado");
-					board[newRow][newCol] = "";
-					queue.push({ row: newRow, col: newCol });
-				} 
-				else if (board[newRow][newCol] > 0) {
-					cel[newRow * board[0].length + newCol].classList.add("bloco-clicado");
+			if (newRow >= 0 && newRow < jogo.length && newCol >= 0 && newCol < jogo[0].length) {
+				if (jogo[newRow][newCol] === 0) {
+					blocos[newRow * jogo[0].length + newCol].classList.add("bloco-clicado");
+					jogo[newRow][newCol] = "";
+					queue.push({ linha: newRow, coluna: newCol });
+				}
+				else if (jogo[newRow][newCol] > 0) {
+					blocos[newRow * jogo[0].length + newCol].classList.add("bloco-clicado");
 
-					const Nbombas = board[newRow][newCol];
+					const Nbombas = jogo[newRow][newCol];
 
 					const corNBombas = {
-						1: ()=>{cel[newRow * board[0].length + newCol].style.color = "#0100fb"},
-						2: ()=>{cel[newRow * board[0].length + newCol].style.color = "#017e00"},
-						3: ()=>{cel[newRow * board[0].length + newCol].style.color = "#fa0103"},
-						4: ()=>{cel[newRow * board[0].length + newCol].style.color = "#010180"},
-						5: ()=>{cel[newRow * board[0].length + newCol].style.color = "#800002"},
-						6: ()=>{cel[newRow * board[0].length + newCol].style.color = "#018181"},
-						7: ()=>{cel[newRow * board[0].length + newCol].style.color = "#333333"},
-						8: ()=>{cel[newRow * board[0].length + newCol].style.color = "#808080"},
+						1: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#0100fb" },
+						2: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#017e00" },
+						3: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#fa0103" },
+						4: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#010180" },
+						5: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#800002" },
+						6: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#018181" },
+						7: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#333333" },
+						8: () => { blocos[newRow * jogo[0].length + newCol].style.color = "#808080" },
 					}
 					corNBombas[Nbombas]();
-					cel[newRow * board[0].length + newCol].innerText = board[newRow][newCol];
-					board[newRow][newCol] = "";
+					blocos[newRow * jogo[0].length + newCol].innerText = jogo[newRow][newCol];
+					jogo[newRow][newCol] = "";
 				}
 			}
 		}
@@ -230,7 +235,6 @@ function VerificaVitoria(Nbombas) {
 	const blocosNaoRevelados = document.getElementById("jogo").querySelectorAll(".bloco:not(.bloco-clicado)");
 
 	return blocosNaoRevelados.length === Nbombas;
-	// return (blocosRevelados.length === matriz.length * matriz[0].length) || (blocosRevelados.length-Nbombas === matriz.length * matriz[0].length)//quantidade de blocos no total - quantidade de bombas
 }
 
 function ResolveJogo(matriz, linha, coluna) {
