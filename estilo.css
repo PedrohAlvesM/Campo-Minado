@@ -26,8 +26,8 @@ body, .configuracao, .modal {
     left: 50%;
     transform: translate(-50%, -50%);
 
-	width: 500px;
-	height: 300px;
+	width: 50%;
+	height: auto;
 	background-color: lightgray;
 	justify-content: space-around;
 }
@@ -76,6 +76,14 @@ section > * {
 
 #menu {
 	display: flex;
+}
+
+#abrir-estatisticas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: lightgray;
+	cursor: pointer;
 }
 
 .borda-container {

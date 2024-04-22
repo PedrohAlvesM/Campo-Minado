@@ -1,6 +1,8 @@
-import { CampoMinado } from "./jogo-class.js";
+import { CampoMinado } from "./campo-minado-class.js";
 
 const jogo = new CampoMinado(9,9,10);
+jogo.CarregarEstatisticas();
+
 let dificuldade = document.getElementById("dificuldade");
 
 document.querySelector("section").oncontextmenu = function () {
@@ -14,7 +16,7 @@ dificuldade.addEventListener("change", ()=>{
             "facil": ()=>{
                 jogo.largura = 9;
                 jogo.altura = 9;
-                jogo.nBombas = 10
+                jogo.nBombas = 10;
                 jogo.Main();
             },
             "medio": ()=>{
@@ -62,4 +64,9 @@ function DificuldadePersonalizada() {
     }
 }
 
-document.getElementById("sair-modal").addEventListener("click", ()=>{document.getElementsByClassName("modal")[0].style.display = "none"});
+const btn = document.getElementsByClassName("sair-modal");
+for (let i = 0; i < btn.length; i++) {
+    btn[i].addEventListener("click", ()=>{document.getElementsByClassName("modal")[i].style.display = "none";});
+}
+
+document.getElementById("abrir-estatisticas").addEventListener("click", ()=>{document.getElementsByClassName("estatisticas")[0].style.display = "flex"});

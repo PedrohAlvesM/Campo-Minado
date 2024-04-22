@@ -12,6 +12,8 @@
 </head>
 <body>
 
+  <span id="abrir-estatisticas" class="borda-container">Estatísticas</span>
+
   <div class="modal borda-container">
     
     <h1>Dificuldade personalizada</h1>
@@ -31,10 +33,33 @@
       <input type="number" id="bombas-personalizado">
     </div>
     <div>
-      <button id="sair-modal">Cancelar</button>
+      <button class="sair-modal">Cancelar</button>
       <button id="confirmar-personalizado">Confirmar</button>
     </div>
     <p id="mensagem">O numero de bombas não pode ser maior que <em>Largura x Altura</em>. </p>
+  </div>
+
+  <div class="modal estatisticas borda-container">
+    <p id="n-partidas">Partidas jogadas: </p>
+    <p id="vitorias">Vitórias: </p>
+    <p id="derrotas">Derrotas: </p>
+    
+    <p id="n-partidas-facil">Partidas jogadas na dificuldade fácil: </p>
+    <p id="vitorias-facil">Vitórias na dificuldade fácil: </p>
+    <p id="derrotas-facil">Derrotas na dificuldade fácil: </p>
+    <p id="tempo-facil">Tempo médio para vencer na dificuldade fácil: </p>
+    
+    <p id="n-partidas-medio">Partidas jogadas na dificuldade média: </p>
+    <p id="vitorias-medio">Vitórias na dificuldade médio: </p>
+    <p id="derrotas-medio">Derrotas na dificuldade médio: </p>
+    <p id="tempo-medio">Tempo médio para vencer na dificuldade média: </p>
+    
+    <p id="n-partidas-dificil">Partidas jogadas na dificuldade difícil: </p>
+    <p id="vitorias-dificil">Vitórias na dificuldade difícil: </p>
+    <p id="derrotas-dificil">Derrotas na dificuldade difícil: </p>
+    <p id="tempo-dificil">Tempo médio para vencer na dificuldade difícil: </p>
+
+    <button class="sair-modal">Fechar</button>
   </div>
   
   <section class="borda-container">
@@ -65,7 +90,6 @@
       };
     }
   </script>
-  <!-- <script src="main.js"> </script> -->
   <script type="module" src="main.js"> </script>
 </body>
 </html>

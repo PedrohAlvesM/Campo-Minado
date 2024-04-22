@@ -1,7 +1,9 @@
 export class CampoMinado {
     #contaBombas;
-    #cronometro;
+    #tempoJogado
+    #IDCronometro;
     #venceu = false;
+    #perdeu = false;
     #bombasCriadas = false;
 
     #matrizJogo;
@@ -18,8 +20,10 @@ export class CampoMinado {
     }
 
     Main() {
-        clearInterval(this.#cronometro);
+        clearInterval(this.#IDCronometro);
         this.#venceu = false;
+        this.#perdeu = false;
+        this.#bombasCriadas = false;
 
         this.#contaBombas = this.#nBombas;
         document.getElementById("rosto").classList.remove("sad");
@@ -143,10 +147,9 @@ export class CampoMinado {
         }
         else if (btnMouse.button === 0 && this.#matrizJogo[linhaMatriz][colunaMatriz] === "B") {
             if (!this.#celulas[indiceArr].classList.contains("bandeira")) {
+                this.#perdeu = true;
                 this.#celulas[indiceArr].classList.add("bomba-explodiu", "imagem");
-                clearInterval(this.#cronometro);
-                document.getElementById("rosto").classList.remove("feliz");
-                document.getElementById("rosto").classList.add("sad");
+                this.FimDeJogo();
 
                 this.RevelaJogo(this.#matrizJogo, this.#celulas);
             }
@@ -267,19 +270,122 @@ export class CampoMinado {
 
     Cronometro() {
         let tempo = document.getElementById("tempo-jogado");
-        let i = 0;
-        this.#cronometro = setInterval(() => {
-            i++;
-            tempo.innerText = i;
+        this.#tempoJogado = 0;
+        this.#IDCronometro = setInterval(() => {
+            this.#tempoJogado++;
+            tempo.innerText = this.#tempoJogado;
         }, 1000);
     }
 
 
     FimDeJogo() {
-        clearInterval(this.#cronometro);
+        clearInterval(this.#IDCronometro);
         const rosto = document.getElementById("rosto");
-        rosto.classList.remove("feliz");
-        rosto.classList.add("vitoria");
+
+        if (this.#venceu) {
+            rosto.classList.remove("feliz");
+            rosto.classList.add("vitoria");
+        }
+        else {
+            rosto.classList.remove("feliz");
+            rosto.classList.add("sad");
+        }
+
+        this.SalvarEstatisticas();
+        this.CarregarEstatisticas();
+        document.getElementsByClassName("estatisticas")[0].style.display = "flex";
+    }
+
+    SalvarEstatisticas() {
+        const salvar = this.ObterEstatisticas();
+        if (this.#venceu) {
+            salvar.vitorias++;
+            if (this.#largura === 9 && this.#altura === 9) {
+                salvar.vitoriasFacil++;
+                salvar.partidasJogadasFacil++;
+                salvar.tempoMedioPGanharFacil = (salvar.tempoMedioPGanharFacil + this.#tempoJogado) / salvar.partidasJogadasFacil;
+            }
+            else if (this.#largura === 16 && this.#altura === 16) {
+                salvar.vitoriasMedio++;
+                salvar.partidasJogadasMedio++;
+                salvar.tempoMedioPGanharMedio = (salvar.tempoMedioPGanharMedio + this.#tempoJogado) / salvar.partidasJogadasMedio;
+            }
+            else if (this.#largura === 50 && this.#altura === 50) {
+                salvar.vitoriasDificil++;
+                salvar.partidasJogadasDificil++;
+                salvar.tempoMedioPGanharDificil = (salvar.tempoMedioPGanharDificil + this.#tempoJogado) / salvar.partidasJogadasDificil;
+            }
+        }
+        else if (this.#perdeu) {
+            salvar.derrotas++;
+            if (this.#largura === 9 && this.#altura === 9) {
+                salvar.derrotasFacil++;
+                salvar.partidasJogadasFacil++;
+                salvar.tempoMedioPGanharFacil = (salvar.tempoMedioPGanharFacil + this.#tempoJogado) / salvar.partidasJogadasFacil;
+            }
+            else if (this.#largura === 16 && this.#altura === 16) {
+                salvar.derrotasMedio++;
+                salvar.partidasJogadasMedio++;
+                salvar.tempoMedioPGanharMedio = (salvar.tempoMedioPGanharMedio + this.#tempoJogado) / salvar.partidasJogadasMedio;
+            }
+            else if (this.#largura === 50 && this.#altura === 50) {
+                salvar.derrotasDificil++;
+                salvar.partidasJogadasDificil++;
+                salvar.tempoMedioPGanharDificil = (salvar.tempoMedioPGanharDificil + this.#tempoJogado) / salvar.partidasJogadasDificil;
+            }
+        }
+
+        salvar.partidasJogadas++;
+        if (localStorage.getItem("estatisticas")) {
+            localStorage.removeItem("estatisticas");
+        }
+        localStorage.setItem("estatisticas", JSON.stringify(salvar));
+    }
+
+    ObterEstatisticas() {
+        return localStorage.getItem("estatisticas") === null ? {
+            vitorias: 0,
+            derrotas: 0,
+            partidasJogadas: 0,
+
+            tempoMedioPGanharFacil: 0,
+            partidasJogadasFacil: 0,
+            vitoriasFacil: 0,
+            derrotasFacil: 0,
+
+            tempoMedioPGanharMedio: 0,
+            partidasJogadasMedio: 0,
+            vitoriasMedio: 0,
+            derrotasMedio: 0,
+
+            tempoMedioPGanharDificil: 0,
+            partidasJogadasDificil: 0,
+            vitoriasDificil: 0,
+            derrotasDificil: 0,
+        } : JSON.parse(localStorage.getItem("estatisticas"));
+    }
+
+    CarregarEstatisticas() {
+        const dados = this.ObterEstatisticas();
+
+        document.getElementById("n-partidas").innerText = `Partidas jogadas: ${dados.partidasJogadas}`;
+        document.getElementById("vitorias").innerText = `Vitórias: ${dados.vitorias}`;
+        document.getElementById("derrotas").innerText = `Derrotas: ${dados.derrotas}`;
+
+        document.getElementById("n-partidas-facil").innerText = `Partidas jogadas na difilculdade fácil: ${dados.partidasJogadasFacil}`;
+        document.getElementById("vitorias-facil").innerText = `Vitórias na dificuldade fácil: ${dados.vitoriasFacil}`;
+        document.getElementById("derrotas-facil").innerText = `Derrotas na dificuldade fácil: ${dados.derrotasFacil}`;
+        document.getElementById("tempo-facil").innerText = `Tempo médio para vencer na dificuldade fácil: ${dados.tempoMedioPGanharFacil}`;
+
+        document.getElementById("n-partidas-medio").innerText = `Partidas jogadas na difilculdade média: ${dados.partidasJogadasMedio}`;
+        document.getElementById("vitorias-medio").innerText = `Vitórias na dificuldade médio: ${dados.vitoriasMedio}`;
+        document.getElementById("derrotas-medio").innerText = `Derrotas na dificuldade médio: ${dados.derrotasMedio}`;
+        document.getElementById("tempo-medio").innerText = `Tempo médio para vencer na dificuldade média: ${dados.tempoMedioPGanharMedio}`;
+
+        document.getElementById("n-partidas-dificil").innerText = `Partidas jogadas na difilculdade difícil: ${dados.partidasJogadasDificil}`;
+        document.getElementById("vitorias-dificil").innerText = `Vitórias na dificuldade difícil: ${dados.vitoriasDificil}`;
+        document.getElementById("derrotas-dificil").innerText = `Derrotas na dificuldade difícil: ${dados.derrotasDificil}`;
+        document.getElementById("tempo-dificil").innerText = `Tempo médio para vencer na dificuldade difícil: ${dados.tempoMedioPGanharDificil}`;
     }
 
     get contaBombas() {
@@ -294,14 +400,14 @@ export class CampoMinado {
     }
 
     get cronometro() {
-        return this.#cronometro;
+        return this.#tempoJogado;
     }
 
     set cronometro(valor) {
         if (typeof valor !== 'number') {
             throw new Error('O valor atribuído ao cronômetro deve ser um número.');
         }
-        this.#cronometro = valor;
+        this.#tempoJogado = valor;
     }
 
     get venceu() {
@@ -313,6 +419,16 @@ export class CampoMinado {
             throw new Error('O valor atribuído a venceu deve ser um booleano.');
         }
         this.#venceu = valor;
+    }
+
+    get perdeu() {
+        return this.#perdeu;
+    }
+    set perdeu(valor) {
+        if (typeof valor !== "boolean") {
+            throw new Error("O valor atribuído a perdeu deve ser um booleano.");
+        }
+        this.#perdeu = valor;
     }
 
     get bombasCriadas() {
